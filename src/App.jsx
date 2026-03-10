@@ -539,7 +539,7 @@ export default function App() {
   }, [startGame])
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen w-full bg-stone-50">
       {screen === 'start' && <StartScreen onStart={startGame} />}
       {screen === 'game' && <GameScreen images={gameImages} onFinish={finishGame} />}
       {screen === 'results' && <ResultsScreen results={results} onPlayAgain={playAgain} />}
