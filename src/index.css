@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
-html, body, #root {
+html, body {
   width: 100%;
   min-height: 100dvh;
+}
+
+#root {
+  width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
 }
 
 body {
