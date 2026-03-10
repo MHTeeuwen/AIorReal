@@ -175,19 +175,18 @@ function RetryImage({ src, alt, className, onLoad, onError, maxRetries = 3 }) {
   )
 }
 
-// Progress bar
-function ProgressBar({ current, total }) {
+// Story-style progress segments (like Instagram stories)
+function ProgressSegments({ current, total }) {
   return (
-    <div className="w-full max-w-md mx-auto mb-6">
-      <div className="flex justify-between text-xs text-stone-400 mb-1.5">
-        <span className="font-medium">Ronde {current}/{total}</span>
-      </div>
-      <div className="h-1.5 bg-stone-200 rounded-full overflow-hidden">
+    <div className="flex gap-1 px-3 pt-3 pb-2 shrink-0">
+      {Array.from({ length: total }, (_, i) => (
         <div
-          className="h-full bg-amber-500 rounded-full transition-all duration-500 ease-out"
-          style={{ width: `${(current / total) * 100}%` }}
+          key={i}
+          className={`flex-1 h-1 rounded-full transition-colors duration-300 ${
+            i < current ? 'bg-amber-500' : 'bg-stone-200'
+          }`}
         />
-      </div>
+      ))}
     </div>
   )
 }
@@ -195,7 +194,7 @@ function ProgressBar({ current, total }) {
 // Start screen
 function StartScreen({ onStart }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 text-center animate-fade-in">
+    <div className="flex flex-col items-center justify-center h-[100dvh] px-4 text-center animate-fade-in">
       <div className="text-6xl mb-6 animate-pop-in">
         🎭
       </div>
@@ -283,113 +282,100 @@ function GameScreen({ images, onFinish }) {
   }, [round, score, answers, guess, onFinish])
 
   return (
-    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto">
-      <ProgressBar current={round + 1} total={TOTAL_ROUNDS} />
+    <div className="h-[100dvh] flex flex-col bg-stone-50">
+      <ProgressSegments current={round + 1} total={TOTAL_ROUNDS} />
 
-      {/* Image Card */}
+      {/* Image — fills all available space */}
       <div
         key={cardKey}
-        className={`relative bg-white rounded-2xl overflow-hidden border shadow-lg shadow-stone-900/5 animate-fade-in-up transition-all duration-300 ${
-          guess === 'correct'
-            ? 'border-emerald-300 ring-2 ring-emerald-200'
-            : guess === 'wrong'
-            ? 'border-rose-300 ring-2 ring-rose-200'
-            : 'border-stone-200'
-        }`}
+        className="flex-1 min-h-0 mx-2 mb-2 rounded-2xl overflow-hidden relative animate-fade-in bg-stone-100"
       >
-        {/* Image */}
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-stone-100">
-          {!imageLoaded && !imageError && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-10 h-10 border-3 border-amber-500 border-t-transparent rounded-full animate-spin-slow" />
-            </div>
-          )}
-          {imageError && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-stone-100 text-stone-400">
-              <span className="text-4xl mb-2">🖼️</span>
-              <span className="text-sm">Afbeelding kon niet laden</span>
-              <span className="text-xs text-stone-400 mt-1">{currentImage.title}</span>
-            </div>
-          )}
-          <RetryImage
-            src={currentImage.url}
-            alt={currentImage.title}
-            className={`w-full h-full object-cover transition-opacity duration-500 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            onLoad={() => setImageLoaded(true)}
-            onError={() => { setImageError(true); setImageLoaded(true) }}
-          />
+        {/* Loading spinner */}
+        {!imageLoaded && !imageError && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="w-10 h-10 border-3 border-amber-500 border-t-transparent rounded-full animate-spin-slow" />
+          </div>
+        )}
 
-          {/* Answer overlay */}
-          {guess && (
-            <div className="absolute top-4 right-4">
-              <div
-                className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-bold text-white shadow-md animate-gentle-bounce ${
-                  guess === 'correct'
-                    ? 'bg-emerald-500'
-                    : 'bg-rose-500'
+        {/* Error state */}
+        {imageError && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-stone-400 z-10">
+            <span className="text-4xl mb-2">🖼️</span>
+            <span className="text-sm">Afbeelding kon niet laden</span>
+          </div>
+        )}
+
+        <RetryImage
+          src={currentImage.url}
+          alt={currentImage.title}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+            imageLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          onLoad={() => setImageLoaded(true)}
+          onError={() => { setImageError(true); setImageLoaded(true) }}
+        />
+
+        {/* Correct/wrong badge */}
+        {guess && (
+          <div className="absolute top-4 right-4 z-20">
+            <div
+              className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-bold text-white shadow-md animate-gentle-bounce ${
+                guess === 'correct' ? 'bg-emerald-500' : 'bg-rose-500'
+              }`}
+            >
+              {guess === 'correct' ? '✓' : '✗'}
+            </div>
+          </div>
+        )}
+
+        {/* Fact overlay — gradient over image */}
+        {showFact && (
+          <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 via-black/50 to-transparent pt-20 p-5 animate-fade-in">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-white/20 text-white backdrop-blur-sm">
+                {currentImage.isAI ? '🤖 AI' : '🎨 Echt'}
+              </span>
+              <span
+                className={`text-sm font-semibold ${
+                  guess === 'correct' ? 'text-emerald-400' : 'text-rose-400'
                 }`}
               >
-                {guess === 'correct' ? '✓' : '✗'}
-              </div>
+                {guess === 'correct' ? 'Goed!' : 'Fout!'}
+              </span>
             </div>
-          )}
-        </div>
-
-        {/* Content area */}
-        <div className="p-5">
-          {!showFact ? (
-            <div className="animate-fade-in">
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => handleGuess(true)}
-                  className="btn-press flex items-center justify-center gap-2 py-4 px-4 bg-stone-50 hover:bg-amber-50 border-2 border-stone-200 hover:border-amber-300 rounded-2xl font-semibold text-stone-700 transition-colors duration-200 cursor-pointer"
-                >
-                  <span className="text-xl">🤖</span>
-                  <span>AI</span>
-                </button>
-                <button
-                  onClick={() => handleGuess(false)}
-                  className="btn-press flex items-center justify-center gap-2 py-4 px-4 bg-stone-50 hover:bg-amber-50 border-2 border-stone-200 hover:border-amber-300 rounded-2xl font-semibold text-stone-700 transition-colors duration-200 cursor-pointer"
-                >
-                  <span className="text-xl">🎨</span>
-                  <span>Echt</span>
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="animate-fade-in-up">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-stone-100 text-stone-600 border border-stone-200">
-                  {currentImage.isAI ? '🤖 AI' : '🎨 Echt'}
-                </span>
-                <span
-                  className={`text-sm font-semibold ${
-                    guess === 'correct' ? 'text-emerald-600' : 'text-rose-600'
-                  }`}
-                >
-                  {guess === 'correct' ? 'Goed!' : 'Fout!'}
-                </span>
-              </div>
-
-              <h3 className="text-lg font-bold text-stone-900 mb-1">
-                {currentImage.title}
-              </h3>
-              <p className="text-stone-500 text-sm leading-relaxed mb-4">
-                {currentImage.funFact}
-              </p>
-
-              <button
-                onClick={handleNext}
-                className="btn-press w-full py-3.5 bg-amber-500 hover:bg-amber-600 rounded-xl text-white font-semibold shadow-md shadow-amber-500/15 cursor-pointer transition-colors duration-200"
-              >
-                {round + 1 >= TOTAL_ROUNDS ? 'Bekijk resultaat' : 'Volgende'}
-              </button>
-            </div>
-          )}
-        </div>
+            <h3 className="text-lg font-bold text-white mb-1">
+              {currentImage.title}
+            </h3>
+            <p className="text-white/80 text-sm leading-relaxed mb-4">
+              {currentImage.funFact}
+            </p>
+            <button
+              onClick={handleNext}
+              className="btn-press w-full py-3.5 bg-amber-500 hover:bg-amber-600 rounded-xl text-white font-semibold shadow-md cursor-pointer transition-colors duration-200"
+            >
+              {round + 1 >= TOTAL_ROUNDS ? 'Bekijk resultaat' : 'Volgende'}
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Circular answer buttons */}
+      {!showFact && (
+        <div className="flex justify-center items-center gap-8 py-5 shrink-0">
+          <button
+            onClick={() => handleGuess(true)}
+            className="btn-press w-16 h-16 rounded-full bg-white shadow-lg shadow-stone-900/10 border border-stone-200 flex items-center justify-center text-3xl cursor-pointer hover:scale-105 transition-transform duration-200"
+          >
+            🤖
+          </button>
+          <button
+            onClick={() => handleGuess(false)}
+            className="btn-press w-16 h-16 rounded-full bg-white shadow-lg shadow-stone-900/10 border border-stone-200 flex items-center justify-center text-3xl cursor-pointer hover:scale-105 transition-transform duration-200"
+          >
+            🎨
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -413,7 +399,7 @@ function ResultsScreen({ results, onPlayAgain }) {
   const title = getTitle()
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-8 max-w-lg mx-auto animate-fade-in">
+    <div className="min-h-[100dvh] flex flex-col items-center px-4 py-8 max-w-lg mx-auto animate-fade-in">
       {/* Score reveal */}
       <div className="text-center mb-8 animate-fade-in-scale" style={{ animationDelay: '0.1s' }}>
         <div className="text-5xl mb-3 animate-fade-in-scale" style={{ animationDelay: '0.2s' }}>
@@ -539,7 +525,7 @@ export default function App() {
   }, [startGame])
 
   return (
-    <div className="min-h-screen w-full bg-stone-50">
+    <div className="min-h-[100dvh] w-full bg-stone-50">
       {screen === 'start' && <StartScreen onStart={startGame} />}
       {screen === 'game' && <GameScreen images={gameImages} onFinish={finishGame} />}
       {screen === 'results' && <ResultsScreen results={results} onPlayAgain={playAgain} />}
