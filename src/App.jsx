@@ -181,7 +181,6 @@ function ProgressBar({ current, total }) {
     <div className="w-full max-w-md mx-auto mb-6">
       <div className="flex justify-between text-xs text-stone-400 mb-1.5">
         <span className="font-medium">Ronde {current}/{total}</span>
-        <span>{current} van {total}</span>
       </div>
       <div className="h-1.5 bg-stone-200 rounded-full overflow-hidden">
         <div
@@ -228,7 +227,6 @@ function StartScreen({ onStart }) {
 function GameScreen({ images, onFinish }) {
   const [round, setRound] = useState(0)
   const [score, setScore] = useState(0)
-  const [streak, setStreak] = useState(0)
   const [guess, setGuess] = useState(null) // 'correct' | 'wrong' | null
   const [showFact, setShowFact] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
@@ -256,9 +254,6 @@ function GameScreen({ images, onFinish }) {
 
       if (isCorrect) {
         setScore((s) => s + 1)
-        setStreak((s) => s + 1)
-      } else {
-        setStreak(0)
       }
 
       setAnswers((prev) => [
@@ -289,21 +284,6 @@ function GameScreen({ images, onFinish }) {
 
   return (
     <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="bg-white rounded-xl px-3 py-1.5 border border-stone-200 shadow-sm">
-            <span className="text-xs text-stone-400">Punten</span>
-            <span className="ml-2 font-bold text-stone-900">{score}</span>
-          </div>
-          {streak > 1 && (
-            <div className="bg-amber-50 rounded-xl px-3 py-1.5 border border-amber-200 animate-gentle-bounce">
-              <span className="text-xs font-medium text-amber-600">🔥 {streak} streak</span>
-            </div>
-          )}
-        </div>
-      </div>
-
       <ProgressBar current={round + 1} total={TOTAL_ROUNDS} />
 
       {/* Image Card */}
@@ -361,13 +341,6 @@ function GameScreen({ images, onFinish }) {
         <div className="p-5">
           {!showFact ? (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-bold text-stone-900 mb-1">
-                Wat denk jij?
-              </h2>
-              <p className="text-stone-500 text-sm mb-5">
-                Is dit gemaakt door AI of door een mens?
-              </p>
-
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => handleGuess(true)}
