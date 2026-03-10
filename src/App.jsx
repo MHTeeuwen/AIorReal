@@ -214,8 +214,8 @@ function StartScreen({ onStart }) {
       </p>
       <button
         onClick={onStart}
-        className="btn-press px-8 py-4 bg-amber-500 hover:bg-amber-600 rounded-2xl text-white font-semibold text-lg shadow-md shadow-amber-500/20 cursor-pointer transition-colors duration-200 animate-fade-in-up"
-        style={{ animationDelay: '0.6s' }}
+        className="btn-press bg-amber-500 hover:bg-amber-600 rounded-2xl text-white font-semibold text-lg shadow-md shadow-amber-500/20 cursor-pointer transition-colors duration-200 animate-fade-in-up"
+        style={{ animationDelay: '0.6s', padding: '16px 48px' }}
       >
         Start
       </button>
